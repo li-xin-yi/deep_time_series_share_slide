@@ -1,0 +1,47 @@
+% !TeX engine = xelatex
+\documentclass{ctexbeamer}
+\usepackage{ctex}
+\usepackage{booktabs}
+\usepackage{svg}
+\usepackage[style=authortitle-comp,backend=bibtex]{biblatex}
+\usecolortheme{seagull}
+\setbeamertemplate{sidebar right}{}
+\setbeamertemplate{footline}{%
+	\hfill\usebeamertemplate***{navigation symbols}
+	\hspace{1cm}\insertframenumber{}/\inserttotalframenumber}
+
+\title{针对时间序列分类（TSC）的深度模型}
+\subtitle{Deep Learning for Time Series Classification \footfullcite{fawaz2019deep}}
+\author{Xinyi Li}
+\date{\today}
+
+\addbibresource{ref.bib}
+
+\begin{document}
+\begin{frame}
+	\titlepage
+\end{frame}
+
+\begin{frame}{Overview}
+  \tableofcontents
+\end{frame}
+
+\section{TSC社区生态}
+
+\begin{frame}{Libraries/Implements/Community}
+  \framesubtitle{sktime\footfullcite{sktime}}
+  sktime
+  \begin{itemize}
+    \item \url{https://github.com/alan-turing-institute/sktime}
+    \item based on classic models (shallow)
+    \item \texttt{scikit-learn} interface compatible
+  \end{itemize}
+  sktime-dl
+  \begin{itemize}
+    \item \url{https://github.com/sktime/sktime-dl}
+    \item use \texttt{Keras} to implement all 9 \textbf{STOA} deep models above
+    \color{red}{\item 暂时不能直接安装（MacOS）}
+  \end{itemize}
+\end{frame}
+
+\end{document}
