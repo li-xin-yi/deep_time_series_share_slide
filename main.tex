@@ -3,13 +3,14 @@
 \usepackage{ctex}
 \usepackage{booktabs}
 \usepackage{svg}
+\usepackage{fontspec}
+\usepackage{fontawesome}
 \usepackage[style=authortitle-comp,backend=bibtex]{biblatex}
 \usecolortheme{seagull}
 \setbeamertemplate{sidebar right}{}
 \setbeamertemplate{footline}{%
 	\hfill\usebeamertemplate***{navigation symbols}
 	\hspace{1cm}\insertframenumber{}/\inserttotalframenumber}
-
 \title{针对时间序列分类（TSC）的深度模型}
 \subtitle{Deep Learning for Time Series Classification \footfullcite{fawaz2019deep}}
 \author{Xinyi Li}
@@ -26,22 +27,74 @@
   \tableofcontents
 \end{frame}
 
+\section{问题背景描述}
+\begin{frame}{Different Learning Tasks}
+	\begin{columns}
+
+		\column{.47\textwidth}
+		Univariate
+
+		\column{.47\textwidth}
+		Multi-variate
+		\begin{block}{MTS}
+			\begin{itemize}
+				\item different measurements of the \textbf{same} instance
+				\item \textbf{high correlation}
+				\item feeding features
+			\end{itemize}
+		\end{block}
+
+		\begin{block}{panel data}
+			\begin{itemize}
+				\item the same measurements on \textbf{different} instances
+				\item i.i.d. assumption
+				\item feeding sku/store/...
+			\end{itemize}
+		\end{block}
+	\end{columns}
+\end{frame}
+
+\begin{frame}{Problem Description}
+	\framesubtitle{univariance/multi-variance/panel}
+	\begin{center}
+		\includegraphics[width=\textwidth]{figure/base_formula}
+	\end{center}
+\end{frame}
+
 \section{TSC社区生态}
 
 \begin{frame}{Libraries/Implements/Community}
-  \framesubtitle{sktime\footfullcite{sktime}}
-  sktime
+  \framesubtitle{sktime\footfullcite{sktime} \& its extensions}
+  \href{https://github.com/alan-turing-institute/sktime}{\Large{Sktime}}
   \begin{itemize}
-    \item \url{https://github.com/alan-turing-institute/sktime}
     \item based on classic models (shallow)
     \item \texttt{scikit-learn} interface compatible
   \end{itemize}
-  sktime-dl
+  \href{https://github.com/sktime/sktime-dl}{\Large{Sktime-dl}}
   \begin{itemize}
-    \item \url{https://github.com/sktime/sktime-dl}
-    \item use \texttt{Keras} to implement all 9 \textbf{STOA} deep models above
-    \color{red}{\item 暂时不能直接安装（MacOS）}
+    \item use \texttt{Keras} to implement all 9 \textbf{SOTA} deep models above
+    \color{red}{\item 暂时\textbf{不能}直接安装（MacOS）}
   \end{itemize}
+  \href{http://www.timeseriesclassification.com/}{\Large{UEA \& UCR Time Series Classification Repository}}
+  \begin{itemize}
+    \item 128 TSC datasets + 30 MTS datasets
+    \item Collect a bunch of \textbf{classic} algorithms
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Fully Convolutional Neural Network\footfullcite{gamboa2017deep}}
+	\framesubtitle{FCNN}
+	\begin{center}
+		\includegraphics[width=1.05\textwidth]{figure/fcnn}
+	\end{center}
+\end{frame}
+
+\begin{frame}{}
+  \begin{center}
+  {\Huge{Thanks}} \\
+  All codes, slides and papers available\\
+  \faGithub \href{https://github.com/li-xin-yi/deep_time_series_share_slide}{li-xin-yi/deep\_time\_series\_share\_slide}
+\end{center}
 \end{frame}
 
 \end{document}
