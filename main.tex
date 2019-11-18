@@ -3,6 +3,7 @@
 \usepackage{ctex}
 \usepackage{booktabs}
 \usepackage{svg}
+\usepackage{pdfpages}
 \usepackage{fontspec}
 \usepackage{fontawesome}
 \usepackage[style=authortitle-comp,backend=bibtex]{biblatex}
@@ -61,6 +62,27 @@
 	\end{center}
 \end{frame}
 
+\section{Strong Baseline}
+\begin{frame}{HIVE-COTE\footfullcite{lines2016hive}:}
+	\framesubtitle{\textbf{SOTA} classic algorithm \footfullcite{bagnall2017great}: Collective of Transformation based \textbf{Ensembles} (COTE) with a Hierarchical Vote system}
+	\begin{enumerate}
+		\item Elastic Ensemble(\textbf{EE}): combination of 1-NN classifiers using different measurements
+		\item Shapelet Transform Ensemble(\textbf{ST}): top $k$ shaplets (independent phase short pattern)
+		\item Bag-of-SFA-Symbols (\textbf{BOSS}) Ensemble: shapelets based on presence or absence
+		\item Time Series Forest (\textbf{TSF}): trained on selected $3 \sqrt{m}$ features
+		\item Random Interval Features (\textbf{RIF}): spectral component of \textit{Flat-COTE}
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}{HIVE-COTE Algorithm\footnote{\url{https://github.com/TonyBagnall/py-hive-cote}}}
+	\framesubtitle{ensemble of ensembles}
+	Refs to Flat-COTE
+	\begin{center}
+		\includegraphics[width=.95\textwidth]{figure/flat_cote_algo}
+	\end{center}
+
+\end{frame}
+
 \section{TSC社区生态}
 
 \begin{frame}{Libraries/Implements/Community}
@@ -82,12 +104,27 @@
   \end{itemize}
 \end{frame}
 
-\begin{frame}{Fully Convolutional Neural Network\footfullcite{gamboa2017deep}}
-	\framesubtitle{FCNN}
+\begin{frame}{MLP/DNN}
+	\framesubtitle{Multi Layer Perceptrons/Fully-Connected(FC) Network}
+	The Simplest DNN (e.g. \texttt{keras.Layers.Dense})
+	$$\mathbf{X}_{i+1} = \sigma (\mathbf{W}_i \mathbf{X}_i + b_i)$$
+	Final ($l$-th) layer activate function: softmax
+	$$\hat {y} _{k} (\mathbf{X}_{l-1}) = (e^{\mathbf{W}_k \mathbf{X}_{l-1} + b_k}) /
+	(\sum_{i=1}^{K} {e^{\mathbf{W}_i \mathbf{X}_{l-1} + b_i}})$$
+	Objective loss:  categorical cross entropy
+	$$Loss(\textbf{X}) = - \sum_{i=1}^{K}{y_i} \log {\hat y}_i$$
+	minimized to learn the weights using \textbf{gradient descent} method
+\end{frame}
+
+\begin{frame}{FCNN\footfullcite{gamboa2017deep}}
+	\framesubtitle{Fully Convolutional Neural Network}
 	\begin{center}
 		\includegraphics[width=1.05\textwidth]{figure/fcnn}
 	\end{center}
+	convolution layer ($\forall$ time stamp $t$ shares filter $\color{blue}{\omega}$ with length $l$)
+	$$\mathbf{C}_t = \sigma ({\color{blue}{\omega}}* \mathbf{X}_{t-l/2:t+l/2} + {\color{blue}{b}}) | \forall t \in [1,T ]$$
 \end{frame}
+
 
 \begin{frame}{}
   \begin{center}
