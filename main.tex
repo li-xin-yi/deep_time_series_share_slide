@@ -1,5 +1,6 @@
 % !TeX engine = xelatex
-\documentclass{ctexbeamer}
+% adjust to 16:9 for displays. you can just use \documentclass[handout]{ctexbeamer} for notes
+\documentclass[aspectratio=169]{ctexbeamer}
 \usepackage{ctex}
 \usepackage{booktabs}
 \usepackage{svg}
@@ -75,10 +76,9 @@
 \end{frame}
 
 \begin{frame}{HIVE-COTE Algorithm\footnote{\url{https://github.com/TonyBagnall/py-hive-cote}}}
-	\framesubtitle{ensemble of ensembles}
-	Refs to Flat-COTE
+	\framesubtitle{ensemble of ensembles: ref to Flat-COTE}
 	\begin{center}
-		\includegraphics[width=.95\textwidth]{figure/flat_cote_algo}
+		\includegraphics[width=.7\textwidth]{figure/flat_cote_algo}
 	\end{center}
 
 \end{frame}
@@ -104,6 +104,9 @@
   \end{itemize}
 \end{frame}
 
+\section{深度模型结构}
+
+\subsection{MLP/DNN}
 \begin{frame}{MLP/DNN}
 	\framesubtitle{Multi Layer Perceptrons/Fully-Connected(FC) Network}
 	The Simplest DNN (e.g. \texttt{keras.Layers.Dense})
@@ -116,14 +119,168 @@
 	minimized to learn the weights using \textbf{gradient descent} method
 \end{frame}
 
-\begin{frame}{FCNN\footfullcite{gamboa2017deep}}
+\subsection{FCN}
+\begin{frame}{FCN\footfullcite{gamboa2017deep}}
 	\framesubtitle{Fully Convolutional Neural Network}
 	\begin{center}
-		\includegraphics[width=1.05\textwidth]{figure/fcnn}
+		\includegraphics[width=\textwidth]{figure/fcnn}
 	\end{center}
 	convolution layer ($\forall$ time stamp $t$ shares filter $\color{blue}{\omega}$ with length $l$)
 	$$\mathbf{C}_t = \sigma ({\color{blue}{\omega}}* \mathbf{X}_{t-l/2:t+l/2} + {\color{blue}{b}}) | \forall t \in [1,T ]$$
 \end{frame}
+
+\subsection{ResNet}
+\begin{frame}{ResNet\footfullcite{wang2017time}}
+ \framesubtitle{Residual Network}
+ \begin{center}
+ 	\includegraphics[width=.8\textwidth]{figure/resnet}
+ \end{center}
+\end{frame}
+
+\subsection{Encoder}
+
+\begin{frame}{Encoder\footfullcite{serra2018towards}}
+	\framesubtitle{Hybrid deep CNN based on FCN}
+	Modified from FCN
+	\begin{itemize}
+		\item GAP layer $\to$ attention layer ({\color{red}{careful design for pre-train}})
+		\item normalization for each Conv layer output:
+		\begin{enumerate}
+			\item ReLU $\to$ PReLU activation function (+ parameter)
+			\item + dropout regularization
+			\item + max pooling
+		\end{enumerate}
+		\begin{center}
+			\includegraphics[width = .95\textwidth]{figure/encoder}
+		\end{center}
+	\end{itemize}
+\end{frame}
+
+\subsection{MCNN}
+\begin{frame}{MCNN\footfullcite{cui2016multi}}
+	\framesubtitle{Multi-scale Convolutional Neural Network}
+	\begin{columns}
+		\column{.45\textwidth}
+		\begin{block}{Similar to Traditional CNN:}
+			\begin{enumerate}
+				\item 2 Conv layer (with max pooling)
+				\item 1 Fully-connected layer
+				\item final softmax layer
+			\end{enumerate}
+		\end{block}
+		\textbf{Heavy} data pre-preprocessing step:
+		\begin{block}{Window Slicing(WS)}
+			for data augmentation:
+			\begin{enumerate}
+				\item slide a window over raw input
+				\item extract subsequences
+			\end{enumerate}
+		\end{block}
+
+		\column{.5\textwidth}
+		Before training, $\forall$ subsequence
+		\begin{block}{Transformations (parallel)}
+		\begin{enumerate}
+			\item identity mapping
+			\begin{itemize}
+				\item keep unchanged $\to$ 1-st Conv
+			\end{itemize}
+			\item down-sampling
+			\begin{itemize}
+				\item $\to$ different shorter lengths subsequences
+				\item $\to$ 1-st Conv
+			\end{itemize}
+			\item smoothing:
+			\begin{itemize}
+				\item equal length one
+				\item $\to$ 1-st Conv
+				\item $\to$ 2-nd Conv
+			\end{itemize}
+		\end{enumerate}
+	\end{block}
+
+	\end{columns}
+\end{frame}
+
+\begin{frame}{MCNN}
+	\framesubtitle{Framework}
+	\begin{center}
+		\includegraphics[width=.95\textwidth]{figure/mcnn}
+	\end{center}
+\end{frame}
+
+\subsection{Time Le-Net}
+
+\begin{frame}{Time Le-Net\footfullcite{le2016data}}
+\framesubtitle{Inspired by Le-Net\footfullcite{lecun1998gradient},like CNN: 2 Conv + FC + final softmax}
+\begin{columns}
+	\column{.47\textwidth}
+	Compared to FCN:\\
+	GAP $\to$ {\color{red}FC}
+	\begin{block}{Local max pooling}
+		\begin{itemize}
+			\item take max in a local pooling
+			\item + invariance to small perturbations
+			\item shorten a time series
+		\end{itemize}
+	\end{block}
+	Still {\color{red}{\#parameters $\uparrow$}} \#invariance $\downarrow$
+	\column{.5\textwidth}
+	Data augmentation to prevent {\color{red}{overfitting}}
+	{\color{gray}{especially on relatively small datasets}}
+	\begin{block}{Window Slicing(WS)}
+		= method used in MCNN
+	\end{block}
+	\begin{block}{Window Warping (WW)}
+		For a time series with length $l$
+		\begin{enumerate}
+			\item dilate ($\times 2$) $\to 2l$
+			\item squeeze ($\times \frac{1}{2}$) $\to \frac{1}{2}l$
+ 		\end{enumerate}
+	\end{block}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Window Warping (WW)}
+	\framesubtitle{Then feed all data (length=$l$,$2l$,$\frac{1}{2}l$) into network}
+	\begin{center}
+		\includegraphics[width=.9\textwidth]{figure/ww}
+	\end{center}
+\end{frame}
+
+\subsection{MCDCNN}
+
+\begin{frame}{MCDCNN\footfullcite{zheng2014time}}
+	\framesubtitle{Multi Channel Deep Convolutional Neural Network: \textbf{Independent} Conv specified for \textbf{MTS}}
+	\begin{center}
+		\includegraphics[width=.75\textwidth]{figure/mcdcnn}
+	\end{center}
+\end{frame}
+
+\subsection{Time-CNN}
+
+\begin{frame}{Time-CNN \footfullcite{zhao2017convolutional}}
+	\framesubtitle{both for univariate and multivariate}
+	Main differences compared to previous models:
+	\begin{enumerate}
+		\item loss function: categorical cross-entropy $\to$ MSE
+		\item activate function of final layer: softmax $\to$ sigmoid
+			$$\sum_{i=1}^{K}{p(\hat Y_{i})} \ne 1$$
+		\item throughout CNN: local max pooling $\to$ local average pooling
+	\end{enumerate}
+	Compared to some models:
+	\begin{itemize}
+		\item apply 1 Conv for all dimensions (unlike MCDCNN)
+		\item Conv directly fully connected to final layer (modify FCN: GAP $\to$ FC)
+	\end{itemize}
+
+\end{frame}
+
+\subsection{TWIESN}
+\begin{frame}{TWIESN\footfullcite{tanisaro2016time}}
+	\framesubtitle{Time Warping Invariant Echo State Network}
+\end{frame}
+
 
 
 \begin{frame}{}
