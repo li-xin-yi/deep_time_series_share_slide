@@ -1,4 +1,5 @@
 % !TeX engine = xelatex
+% !TeX spellcheck = en-US
 % adjust to 16:9 for displays. you can just use \documentclass[handout]{ctexbeamer} for notes
 \documentclass[aspectratio=169]{ctexbeamer}
 \usepackage{ctex}
@@ -30,14 +31,18 @@
 \end{frame}
 
 \section{问题背景描述}
-\begin{frame}{Different Learning Tasks}
+
+\begin{frame}{Problem Description}
+	\framesubtitle{univariance/multi-variance/panel}
+	\begin{center}
+		\includegraphics[width=\textwidth]{figure/base_formula}
+	\end{center}
+\end{frame}
+
+\begin{frame}{Different Univariate Learning Tasks}
 	\begin{columns}
 
 		\column{.47\textwidth}
-		Univariate
-
-		\column{.47\textwidth}
-		Multi-variate
 		\begin{block}{MTS}
 			\begin{itemize}
 				\item different measurements of the \textbf{same} instance
@@ -46,6 +51,7 @@
 			\end{itemize}
 		\end{block}
 
+		\column{.47\textwidth}
 		\begin{block}{panel data}
 			\begin{itemize}
 				\item the same measurements on \textbf{different} instances
@@ -56,12 +62,7 @@
 	\end{columns}
 \end{frame}
 
-\begin{frame}{Problem Description}
-	\framesubtitle{univariance/multi-variance/panel}
-	\begin{center}
-		\includegraphics[width=\textwidth]{figure/base_formula}
-	\end{center}
-\end{frame}
+
 
 \section{Strong Baseline}
 \begin{frame}{HIVE-COTE\footfullcite{lines2016hive}:}
@@ -83,26 +84,6 @@
 
 \end{frame}
 
-\section{TSC社区生态}
-
-\begin{frame}{Libraries/Implements/Community}
-  \framesubtitle{sktime\footfullcite{sktime} \& its extensions}
-  \href{https://github.com/alan-turing-institute/sktime}{\Large{Sktime}}
-  \begin{itemize}
-    \item based on classic models (shallow)
-    \item \texttt{scikit-learn} interface compatible
-  \end{itemize}
-  \href{https://github.com/sktime/sktime-dl}{\Large{Sktime-dl}}
-  \begin{itemize}
-    \item use \texttt{Keras} to implement all 9 \textbf{SOTA} deep models above
-    \color{red}{\item 暂时\textbf{不能}直接安装（MacOS）}
-  \end{itemize}
-  \href{http://www.timeseriesclassification.com/}{\Large{UEA \& UCR Time Series Classification Repository}}
-  \begin{itemize}
-    \item 128 TSC datasets + 30 MTS datasets
-    \item Collect a bunch of \textbf{classic} algorithms
-  \end{itemize}
-\end{frame}
 
 \section{深度模型结构}
 
@@ -277,11 +258,116 @@
 \end{frame}
 
 \subsection{TWIESN}
-\begin{frame}{TWIESN\footfullcite{tanisaro2016time}}
-	\framesubtitle{Time Warping Invariant Echo State Network}
+
+\begin{frame}{Echo State Network (ESN)\footfullcite{gallicchio2017deep}}
+	\framesubtitle{Based on RNN}
+	\begin{columns}
+		\column{.6\textwidth}
+		\includegraphics[width=\textwidth]{figure/esn}
+		\column{.4\textwidth}
+		Core part: reservoir
+		\begin{itemize}
+			\item sparsely connected random RNN
+			\item each neuron create its own nonlinear activation of the incoming signal
+		\end{itemize}
+	\end{columns}
+			Internal state at time $t$ : $I(t) \in R^{N_r}$, $N_r = $ \#neurons inside reservoir
+			$$I(t) = \sigma (W_{\text{in}} X(t) + W I(t-1)) | \forall t \in [1,T]$$
+			Finally
+			$${\hat Y} (t) = W_{\text{out}} I(t)$$
 \end{frame}
 
+\begin{frame}{TWIESN\footfullcite{tanisaro2016time}}
+	\framesubtitle{Time Warping Invariant Echo State Network}
+	ESN orginally proposed for time series forecasting
+	$\to$ predicts a probability distribution
 
+	Training
+	\begin{enumerate}
+		\item reservoir space ($\forall t$): $X(t) \to$ \textbf{higher} dimensional space
+		\item train a Ridge classifier to predict the class of each $X(t)$
+	\end{enumerate}
+	Testing
+	\begin{enumerate}
+		\item $\forall X(t)$, trained Ridge classifier predicts a probability distribution
+		\item for each class $k$, calculate a posteriori probability
+		\item label $k$ with the largest average probability
+		$$\arg\max_{k}{\frac{1}{T}} \sum_{t=1}^{T} {\hat Y_k (t)}$$
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}{Summary}
+	\begin{center}
+		\includegraphics[width=1.05\textwidth]{figure/arch}
+	\end{center}
+\end{frame}
+
+\section{结论}
+
+\begin{frame}{Overall Performance}
+	\framesubtitle{Critical Difference Diagram (dataset: UCR/UEA)}
+	{\Large{\begin{description}[leftmargin=!]
+		\item[univariate] \includegraphics[width =.7\textwidth]{figure/uni_cd}
+		\item[multivariate] \includegraphics[width =.7\textwidth]{figure/multi_cd}
+		\item[both] \includegraphics[width =.7\textwidth]{figure/both_cd}
+	\end{description}}}
+\end{frame}
+
+\begin{frame}{For Different Datasets}
+	\begin{center}
+		\includegraphics[width=\textwidth]{figure/theme}
+	\end{center}
+\end{frame}
+
+\begin{frame}{}
+	\begin{center}
+		\includegraphics[width=\textwidth]{figure/length}
+		\\
+		\includegraphics[width=\textwidth]{figure/train_size}
+	\end{center}
+\end{frame}
+
+\subsection{Visualization Reasoning}
+
+\begin{frame}{Class Activation Map (CAM) \footfullcite{zhou2016learning}}
+	\framesubtitle{GAP layer + softmax}
+	univariate time series $A_{m}(t)$ produced by $m$-th filter in Last Conv, input to neuron of class $c$
+	$$\begin{aligned}
+			z_c & = \sum_{m}{{w_m}^c \sum_{t}{A_m(t)}} \\
+			    & =  \sum_{m}{\sum_{t} {{w_m}^c A_m(t)}}
+		\end{aligned}$$
+	Therefore, $CAM_c$ that explains the classification as label $c$
+	$$CAM_c (t)= \sum_{m}{{w_m}^c A_m(t)}$$
+	constructed a new time series for further observation and explaination.
+\end{frame}
+
+\begin{frame}{Find discriminative Region}
+	\framesubtitle{Example: FCN/ResNet on GunPoint dataset (achieve 100\% accurancy)}
+	\begin{center}
+		\includegraphics[width=.6\textwidth]{figure/cam_example}
+	\end{center}
+\end{frame}
+
+\section{TSC社区生态}
+
+\begin{frame}{Libraries/Implements/Community}
+  \framesubtitle{sktime\footfullcite{sktime} \& its extensions}
+  \href{https://github.com/alan-turing-institute/sktime}{\Large{Sktime}}
+  \begin{itemize}
+    \item based on classic models (shallow)
+    \item \texttt{scikit-learn} interface compatible
+  \end{itemize}
+  \href{https://github.com/sktime/sktime-dl}{\Large{Sktime-dl}}
+  \begin{itemize}
+    \item use \texttt{Keras} to implement all 9 deep models above
+    \color{red}{\item 暂时\textbf{不能}直接安装（MacOS）}
+  \end{itemize}
+  \href{http://www.timeseriesclassification.com/}{\Large{UEA \& UCR Time Series Classification Repository}}
+  \begin{itemize}
+    \item 128 TSC datasets + 30 MTS datasets
+    \item Collect a bunch of \textbf{classic} algorithms
+  \end{itemize}
+\end{frame}
 
 \begin{frame}{}
   \begin{center}
